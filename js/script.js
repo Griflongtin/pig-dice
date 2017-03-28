@@ -15,17 +15,18 @@ function Die() {
   this.sides = [1,2,3,4,5,6];
 }
 
-Die.prototype.roll = function(turnCount, turnScore) {
+Die.prototype.roll = function(turnCount, player) {
   var rolledSide = this.sides[Math.floor(Math.random() * this.sides.length)];
+  console.log(rolledSide);
   if (rolledSide === 1) {
-    turnScore = 0;
+    player.turnScore = 0;
     turnCount++;
   } else {
-    turnScore += rolledSide;
+    player.turnScore += rolledSide;
   }
 }
 
-var turnPlayer = function(player1, player2, turnCount) {
+var whichTurn = function(player1, player2, turnCount) {
   if (turnCount % 2 === 0) {
     return player2;
   } else {
@@ -36,16 +37,26 @@ var turnPlayer = function(player1, player2, turnCount) {
 
 //ui logic
 $(function() {
+  var die = new Die();
+
   $('form').submit(function(event) {
     var player1Name = $('input#player1name').val();
     var player2Name = $('input#player2name').val();
     var player1 = new Player(player1Name);
     var player2 = new Player(player2Name);
-    var die = new Die();
-    console.log(player1);
-    console.log(player2);
-    console.log(die);
+    var turnCount = 1;
+
+    
+    $('button#roll-button').click(function() {
+      var turnPlayer = whichTurn(player1, player2, turnCount);
+      die.roll(turnCount, turnPlayer);
+      console.log(turnPlayer.turnScore);
+      console.log(turnPlayer);
+      // debugger;
+    });
 
     event.preventDefault();
   });
+
+
 });
