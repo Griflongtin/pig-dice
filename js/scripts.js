@@ -8,13 +8,13 @@ function Player(name, number) {
 }
 
 //ends the current Player's turn and adds their turn score to their total score
-Player.prototype.hold = function(turnScore, playerScore, turns) {
-  playerScore += turnScore;
-  turns++;
+Player.prototype.hold = function() {
+  this.playerScore += this.turnScore;
+  this.turnScore = 0;
 }
 
 Player.prototype.checkForWin = function() {
-  
+
 }
 
 
@@ -72,7 +72,6 @@ $(function() {
       //insert current game info (dice roll/turn score/total score) into the div of the current player (1 or 2)
       $('#player' + turnPlayer.playerNumber + ' .die-roll').text(roll);
       $('#player' + turnPlayer.playerNumber + ' .turnscore').text(turnPlayer.turnScore);
-      $('#player' + turnPlayer.playerNumber + ' .playerscore').text(turnPlayer.playerScore);
 
       //if a 1 was rolled, increment the turn count and display the new turn player
       if (turnPlayer.turnScore === 0) {
@@ -81,11 +80,17 @@ $(function() {
         $('#turn-player-name').text(turnPlayer.playerName);
       }
 
-      // console.log(turnPlayer.turnScore);
-      // console.log(turnPlayer);
-      // console.log('turn count: ' + turnCount);
-      // console.log('roll: ' + roll);
-      // console.log(turnPlayerNumber);
+    });
+
+    $('button#hold-button').click(function() {
+      var turnPlayer = whichTurn(player1, player2, turnCount)
+      turnPlayer.hold();
+      $('#player' + turnPlayer.playerNumber + ' .playerscore').text(turnPlayer.playerScore);
+      console.log(turnCount);
+      turnCount++;
+      turnPlayer = whichTurn(player1, player2, turnCount);
+      $('#turn-player-name').text(turnPlayer.playerName);
+
     });
   });
 });
