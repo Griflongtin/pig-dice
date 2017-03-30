@@ -14,9 +14,17 @@ Player.prototype.hold = function() {
 }
 
 Player.prototype.checkForWin = function() {
-
+  var win = false;
+  if (this.playerScore >= 100) {
+    win = true;
+  }
+  return win;
 }
 
+Player.prototype.resetScore = function() {
+  this.turnScore = 0;
+  this.playerScore = 0;
+}
 
 //object representing a six-sided die
 function Die() {
@@ -56,41 +64,58 @@ $(function() {
         die = new Die(),
         turnCount = 1;
 
-    //reset the form and display player1 as turn player
-    $(this).trigger('reset');
-    $('#turn-player-name').text(player1Name);
+    if (player1Name && player2Name && player1Name !== player2Name) {
+      $(this).hide();
+      $('#game').show();
+      $("#name1").text(player1Name);
+      $('#name2').text(player2Name);
+      //reset the form and display player1 as turn player
+      $(this).trigger('reset');
+      $('#turn-player-name').text(player1Name);
 
 
-    $('button#roll-button').click(function() {
-      //determine the turn Player (will be an object),
+      $('button#roll-button').click(function() {
+        //determine the turn Player (will be an object),
+        var turnPlayer = whichTurn(player1, player2, turnCount);
+
+        //get a random number 1-6
+        var roll = die.roll(turnPlayer);
+
+        //insert current game info (dice roll/turn score/total score) into the div of the current player (1 or 2)
+        $('#player' + turnPlayer.playerNumber + ' .die-roll').html(roll);
+        $('#player' + turnPlayer.playerNumber + ' .turnscore').html(turnPlayer.turnScore);
+
+        //if a 1 was rolled, increment the turn count and display the new turn player
+        if (turnPlayer.turnScore === 0) {
+          turnCount++;
+          turnPlayer = whichTurn(player1, player2, turnCount);
+          $('#turn-player-name').text(turnPlayer.playerName);
+        }
+      });
+    } else {
+      alert('Please enter a unique name for each player!');
+    }
+
+
+    $('button#hold-button').click(function() {
       var turnPlayer = whichTurn(player1, player2, turnCount);
+      turnPlayer.hold();
+      $('#player' + turnPlayer.playerNumber + ' .die-roll').html(0);
+      $('#player' + turnPlayer.playerNumber + ' .turnscore').html(turnPlayer.turnScore);
 
-      //get a random number 1-6
-      var roll = die.roll(turnPlayer);
-
-
-      //insert current game info (dice roll/turn score/total score) into the div of the current player (1 or 2)
-      $('#player' + turnPlayer.playerNumber + ' .die-roll').text(roll);
-      $('#player' + turnPlayer.playerNumber + ' .turnscore').text(turnPlayer.turnScore);
-
-      //if a 1 was rolled, increment the turn count and display the new turn player
-      if (turnPlayer.turnScore === 0) {
+      if (turnPlayer.checkForWin()) {
+        alert(turnPlayer.playerName + ' you won!' );
+        player1.resetScore();
+        player2.resetScore();
+        turnCount = 1;
+        $('.die-roll, .turnscore, .playerscore').empty();
+        $('#turn-player-name').text(player1.playerName);
+      } else {
+        $('#player' + turnPlayer.playerNumber + ' .playerscore').html(turnPlayer.playerScore);
         turnCount++;
         turnPlayer = whichTurn(player1, player2, turnCount);
         $('#turn-player-name').text(turnPlayer.playerName);
       }
-
-    });
-
-    $('button#hold-button').click(function() {
-      var turnPlayer = whichTurn(player1, player2, turnCount)
-      turnPlayer.hold();
-      $('#player' + turnPlayer.playerNumber + ' .playerscore').text(turnPlayer.playerScore);
-      console.log(turnCount);
-      turnCount++;
-      turnPlayer = whichTurn(player1, player2, turnCount);
-      $('#turn-player-name').text(turnPlayer.playerName);
-
     });
   });
 });
